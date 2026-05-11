@@ -65,22 +65,19 @@ The goal is to build a strong foundation for graphics programming and future gam
 
 # Project Structure
 
-\```text
+```text
 Src/
-│
-├── Dependencies/
-│   ├── GLFW/
-│   │   ├── Include/
-│   │   └── Lib/
-│   │
-│   └── GLEW/
-│       ├── Include/
-│       └── Lib/
-│
-└── main.cpp
-\```
-
----
+|-- Dependencies/
+|   |-- GLFW/
+|   |   |-- Include/
+|   |   `-- Lib/
+|   |
+|   `-- GLEW/
+|       |-- Include/
+|       `-- Lib/
+|
+`-- main.cpp
+```
 
 # Download Dependencies
 
@@ -114,31 +111,31 @@ Open your project in Visual Studio.
 
 These folders contain the header files used by:
 
-\```cpp
+```cpp
 #include <glew.h>
 #include <glfw3.h>
-\```
+```
 
 ## Steps
 
 Go to:
 
-\```text
+```text
 Project -> Properties
-\```
+```
 
 Then:
 
-\```text
+```text
 C/C++ -> General -> Additional Include Directories
-\```
+```
 
 Add:
 
-\```text
+```text
 $(ProjectDir)Dependencies\GLFW\Include
 $(ProjectDir)Dependencies\GLEW\Include
-\```
+```
 
 ---
 
@@ -150,16 +147,16 @@ These folders contain the `.lib` files used during linking.
 
 Go to:
 
-\```text
+```text
 Linker -> General -> Additional Library Directories
-\```
+```
 
 Add:
 
-\```text
+```text
 $(ProjectDir)Dependencies\GLFW\Lib
 $(ProjectDir)Dependencies\GLEW\Lib
-\```
+```
 
 ---
 
@@ -171,17 +168,17 @@ Now tell Visual Studio which libraries to link.
 
 Go to:
 
-\```text
+```text
 Linker -> Input -> Additional Dependencies
-\```
+```
 
 Add:
 
-\```text
+```text
 glfw3.lib
 glew32s.lib
 opengl32.lib
-\```
+```
 
 ---
 
@@ -189,32 +186,32 @@ opengl32.lib
 
 If using the static version of GLEW, add:
 
-\```text
+```text
 GLEW_STATIC
-\```
+```
 
 ## Steps
 
 Go to:
 
-\```text
+```text
 C/C++ -> Preprocessor -> Preprocessor Definitions
-\```
+```
 
 Add:
 
-\```text
+```text
 GLEW_STATIC
-\```
+```
 
 ---
 
 # 5. Include Headers in Your Code
 
-\```cpp
+```cpp
 #include <glew.h>
 #include <glfw3.h>
-\```
+```
 
 Important:
 
@@ -226,15 +223,15 @@ Important:
 
 Build:
 
-\```text
+```text
 CTRL + SHIFT + B
-\```
+```
 
 Run:
 
-\```text
+```text
 CTRL + F5
-\```
+```
 
 If everything is configured correctly, an OpenGL window should appear.
 
