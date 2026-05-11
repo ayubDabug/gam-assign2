@@ -2,6 +2,9 @@
 // Pong Game With Score System
 // OpenGL + GLFW + GLEW
 // First to 10 wins
+// OOP Version
+// Author: Leonardo Moura
+// Last Updated: 5/10/2026
 // ==========================================================
 
 #include <glew.h>
@@ -17,41 +20,6 @@ using namespace std;
 // ==========================================================
 const int WIDTH = 800;
 const int HEIGHT = 600;
-
-// ==========================================================
-// Paddle settings
-// ==========================================================
-float paddleWidth = 0.03f;
-float paddleHeight = 0.25f;
-
-float leftPaddleX = -0.9f;
-float rightPaddleX = 0.9f;
-
-float leftPaddleY = 0.0f;
-float rightPaddleY = 0.0f;
-
-float paddleSpeed = 0.02f;
-
-// ==========================================================
-// Ball settings
-// ==========================================================
-float ballX = 0.0f;
-float ballY = 0.0f;
-
-float ballSize = 0.03f;
-
-float ballSpeedX = 0.01f;
-float ballSpeedY = 0.008f;
-
-// ==========================================================
-// Score
-// ==========================================================
-int leftScore = 0;
-int rightScore = 0;
-
-bool gameOver = false;
-
-string winnerText = "";
 
 // ==========================================================
 // Vertex Shader
@@ -93,10 +61,10 @@ void main()
 )";
 
 // ==========================================================
-// Create shader
+// Shader Creation
 // ==========================================================
 unsigned int createShader(unsigned int type,
-                          const char* source)
+    const char* source)
 {
     unsigned int shader = glCreateShader(type);
 
@@ -108,398 +76,525 @@ unsigned int createShader(unsigned int type,
 }
 
 // ==========================================================
-// Reset Ball
+// Paddle Class
 // ==========================================================
-void resetBall()
+class Paddle
 {
-    ballX = 0.0f;
-    ballY = 0.0f;
+public:
 
-    ballSpeedX *= -1.0f;
-}
+    float x;
+    float y;
 
-// ==========================================================
-// Restart Game
-// ==========================================================
-void restartGame()
-{
-    leftScore = 0;
-    rightScore = 0;
+    float width;
+    float height;
 
-    gameOver = false;
+    float speed;
 
-    winnerText = "";
-
-    leftPaddleY = 0.0f;
-    rightPaddleY = 0.0f;
-
-    resetBall();
-}
-
-// ==========================================================
-// Update Window Title Scoreboard
-// ==========================================================
-void updateWindowTitle(GLFWwindow* window)
-{
-    string title;
-
-    if (!gameOver)
+    Paddle(float startX)
     {
-        title =
-            "Pong  |  Left: " +
-            to_string(leftScore) +
-            "   Right: " +
-            to_string(rightScore);
-    }
-    else
-    {
-        title =
-            winnerText +
-            " Wins!  |  ENTER = Restart  |  ESC = Exit";
+        x = startX;
+        y = 0.0f;
+
+        width = 0.03f;
+        height = 0.25f;
+
+        speed = 0.02f;
     }
 
-    glfwSetWindowTitle(window, title.c_str());
-}
-
-// ==========================================================
-// Input
-// ==========================================================
-void processInput(GLFWwindow* window)
-{
-    // ESC = quit
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    void moveUp()
     {
-        glfwSetWindowShouldClose(window, true);
+        y += speed;
     }
 
-    // Restart
-    if (gameOver &&
-        glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+    void moveDown()
     {
-        restartGame();
+        y -= speed;
     }
 
-    // Stop movement if game ended
-    if (gameOver)
-        return;
+    void clamp()
+    {
+        float halfHeight = height * 0.5f;
 
-    // Left paddle
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        leftPaddleY += paddleSpeed;
+        if (y + halfHeight > 1.0f)
+            y = 1.0f - halfHeight;
 
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        leftPaddleY -= paddleSpeed;
+        if (y - halfHeight < -1.0f)
+            y = -1.0f + halfHeight;
+    }
 
-    // Right paddle
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        rightPaddleY += paddleSpeed;
-
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        rightPaddleY -= paddleSpeed;
-
-    // Clamp paddles
-    float paddleHalfHeight =
-        paddleHeight * 0.5f;
-
-    if (leftPaddleY + paddleHalfHeight > 1.0f)
-        leftPaddleY = 1.0f - paddleHalfHeight;
-
-    if (leftPaddleY - paddleHalfHeight < -1.0f)
-        leftPaddleY = -1.0f + paddleHalfHeight;
-
-    if (rightPaddleY + paddleHalfHeight > 1.0f)
-        rightPaddleY = 1.0f - paddleHalfHeight;
-
-    if (rightPaddleY - paddleHalfHeight < -1.0f)
-        rightPaddleY = -1.0f + paddleHalfHeight;
-}
+    void reset()
+    {
+        y = 0.0f;
+    }
+};
 
 // ==========================================================
-// Main
+// Ball Class
 // ==========================================================
-int main()
+class Ball
 {
+public:
+
+    float x;
+    float y;
+
+    float size;
+
+    float speedX;
+    float speedY;
+
+    Ball()
+    {
+        x = 0.0f;
+        y = 0.0f;
+
+        size = 0.03f;
+
+        speedX = 0.01f;
+        speedY = 0.008f;
+    }
+
+    void move()
+    {
+        x += speedX;
+        y += speedY;
+    }
+
+    void reset()
+    {
+        x = 0.0f;
+        y = 0.0f;
+
+        speedX *= -1.0f;
+    }
+
+    void checkWallCollision()
+    {
+        float halfSize = size * 0.5f;
+
+        // Top
+        if (y + halfSize > 1.0f)
+        {
+            y = 1.0f - halfSize;
+
+            speedY *= -1.0f;
+        }
+
+        // Bottom
+        if (y - halfSize < -1.0f)
+        {
+            y = -1.0f + halfSize;
+
+            speedY *= -1.0f;
+        }
+    }
+};
+
+// ==========================================================
+// Game Class
+// ==========================================================
+class Game
+{
+private:
+
     GLFWwindow* window;
 
-    // ======================================================
-    // Initialize GLFW
-    // ======================================================
-    if (!glfwInit())
-        return -1;
+    Paddle leftPaddle;
+    Paddle rightPaddle;
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    Ball ball;
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    int leftScore;
+    int rightScore;
 
-    glfwWindowHint(GLFW_OPENGL_PROFILE,
-                   GLFW_OPENGL_CORE_PROFILE);
+    bool gameOver;
 
-    // ======================================================
-    // Create Window
-    // ======================================================
-    window = glfwCreateWindow(
-        WIDTH,
-        HEIGHT,
-        "Pong",
-        NULL,
-        NULL
-    );
+    string winnerText;
 
-    if (!window)
-    {
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-
-    // ======================================================
-    // Initialize GLEW
-    // ======================================================
-    if (glewInit() != GLEW_OK)
-    {
-        cout << "GLEW failed\n";
-
-        return -1;
-    }
-
-    cout << "OpenGL Version: "
-         << glGetString(GL_VERSION)
-         << endl;
-
-    // ======================================================
-    // Rectangle vertices
-    // ======================================================
-    float vertices[] =
-    {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f,  0.5f,
-
-        -0.5f, -0.5f,
-         0.5f,  0.5f,
-        -0.5f,  0.5f
-    };
-
-    // ======================================================
-    // VAO + VBO
-    // ======================================================
     unsigned int VAO;
     unsigned int VBO;
 
-    glGenVertexArrays(1, &VAO);
+    unsigned int shaderProgram;
 
-    glGenBuffers(1, &VBO);
+    int offsetLoc;
+    int scaleLoc;
+    int colorLoc;
 
-    glBindVertexArray(VAO);
+public:
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(vertices),
-        vertices,
-        GL_STATIC_DRAW
-    );
-
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        2 * sizeof(float),
-        (void*)0
-    );
-
-    glEnableVertexAttribArray(0);
-
-    // ======================================================
-    // Shaders
-    // ======================================================
-    unsigned int vertexShader =
-        createShader(GL_VERTEX_SHADER,
-                     vertexShaderSource);
-
-    unsigned int fragmentShader =
-        createShader(GL_FRAGMENT_SHADER,
-                     fragmentShaderSource);
-
-    unsigned int shaderProgram =
-        glCreateProgram();
-
-    glAttachShader(shaderProgram, vertexShader);
-
-    glAttachShader(shaderProgram, fragmentShader);
-
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-
-    glDeleteShader(fragmentShader);
-
-    // ======================================================
-    // Uniforms
-    // ======================================================
-    int offsetLoc =
-        glGetUniformLocation(shaderProgram,
-                             "offset");
-
-    int scaleLoc =
-        glGetUniformLocation(shaderProgram,
-                             "scale");
-
-    int colorLoc =
-        glGetUniformLocation(shaderProgram,
-                             "color");
-
-    // ======================================================
-    // Main Loop
-    // ======================================================
-    while (!glfwWindowShouldClose(window))
+    Game()
+        : leftPaddle(-0.9f),
+        rightPaddle(0.9f)
     {
-        // ==================================================
-        // Input
-        // ==================================================
-        processInput(window);
+        leftScore = 0;
+        rightScore = 0;
 
-        updateWindowTitle(window);
+        gameOver = false;
 
-        // ==================================================
-        // Only update gameplay if not game over
-        // ==================================================
+        winnerText = "";
+    }
+
+    // ======================================================
+    // Initialize
+    // ======================================================
+    bool initialize()
+    {
+        if (!glfwInit())
+            return false;
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+        glfwWindowHint(GLFW_OPENGL_PROFILE,
+            GLFW_OPENGL_CORE_PROFILE);
+
+        window = glfwCreateWindow(
+            WIDTH,
+            HEIGHT,
+            "Pong",
+            NULL,
+            NULL
+        );
+
+        if (!window)
+        {
+            glfwTerminate();
+            return false;
+        }
+
+        glfwMakeContextCurrent(window);
+
+        if (glewInit() != GLEW_OK)
+        {
+            cout << "GLEW failed\n";
+            return false;
+        }
+
+        cout << "OpenGL Version: "
+            << glGetString(GL_VERSION)
+            << endl;
+
+        setupBuffers();
+
+        setupShaders();
+
+        return true;
+    }
+
+    // ======================================================
+    // Setup Buffers
+    // ======================================================
+    void setupBuffers()
+    {
+        float vertices[] =
+        {
+            -0.5f, -0.5f,
+             0.5f, -0.5f,
+             0.5f,  0.5f,
+
+            -0.5f, -0.5f,
+             0.5f,  0.5f,
+            -0.5f,  0.5f
+        };
+
+        glGenVertexArrays(1, &VAO);
+
+        glGenBuffers(1, &VBO);
+
+        glBindVertexArray(VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(vertices),
+            vertices,
+            GL_STATIC_DRAW
+        );
+
+        glVertexAttribPointer(
+            0,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            2 * sizeof(float),
+            (void*)0
+        );
+
+        glEnableVertexAttribArray(0);
+    }
+
+    // ======================================================
+    // Setup Shaders
+    // ======================================================
+    void setupShaders()
+    {
+        unsigned int vertexShader =
+            createShader(GL_VERTEX_SHADER,
+                vertexShaderSource);
+
+        unsigned int fragmentShader =
+            createShader(GL_FRAGMENT_SHADER,
+                fragmentShaderSource);
+
+        shaderProgram = glCreateProgram();
+
+        glAttachShader(shaderProgram, vertexShader);
+
+        glAttachShader(shaderProgram, fragmentShader);
+
+        glLinkProgram(shaderProgram);
+
+        glDeleteShader(vertexShader);
+
+        glDeleteShader(fragmentShader);
+
+        offsetLoc =
+            glGetUniformLocation(shaderProgram,
+                "offset");
+
+        scaleLoc =
+            glGetUniformLocation(shaderProgram,
+                "scale");
+
+        colorLoc =
+            glGetUniformLocation(shaderProgram,
+                "color");
+    }
+
+    // ======================================================
+    // Restart Game
+    // ======================================================
+    void restartGame()
+    {
+        leftScore = 0;
+        rightScore = 0;
+
+        gameOver = false;
+
+        winnerText = "";
+
+        leftPaddle.reset();
+        rightPaddle.reset();
+
+        ball.reset();
+    }
+
+    // ======================================================
+    // Update Window Title
+    // ======================================================
+    void updateWindowTitle()
+    {
+        string title;
+
         if (!gameOver)
         {
-            float paddleHalfWidth =
-                paddleWidth * 0.5f;
+            title =
+                "Pong  |  Left: " +
+                to_string(leftScore) +
+                "   Right: " +
+                to_string(rightScore);
+        }
+        else
+        {
+            title =
+                winnerText +
+                " Wins!  |  ENTER = Restart  |  ESC = Exit";
+        }
 
-            float paddleHalfHeight =
-                paddleHeight * 0.5f;
+        glfwSetWindowTitle(window, title.c_str());
+    }
 
-            float ballHalfSize =
-                ballSize * 0.5f;
+    // ======================================================
+    // Input
+    // ======================================================
+    void processInput()
+    {
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE)
+            == GLFW_PRESS)
+        {
+            glfwSetWindowShouldClose(window, true);
+        }
 
-            // ==============================================
-            // Move ball
-            // ==============================================
-            ballX += ballSpeedX;
+        if (gameOver &&
+            glfwGetKey(window, GLFW_KEY_ENTER)
+            == GLFW_PRESS)
+        {
+            restartGame();
+        }
 
-            ballY += ballSpeedY;
+        if (gameOver)
+            return;
 
-            // ==============================================
-            // Top collision
-            // ==============================================
-            if (ballY + ballHalfSize > 1.0f)
-            {
-                ballY = 1.0f - ballHalfSize;
+        // Left paddle
+        if (glfwGetKey(window, GLFW_KEY_W)
+            == GLFW_PRESS)
+        {
+            leftPaddle.moveUp();
+        }
 
-                ballSpeedY *= -1.0f;
-            }
+        if (glfwGetKey(window, GLFW_KEY_S)
+            == GLFW_PRESS)
+        {
+            leftPaddle.moveDown();
+        }
 
-            // ==============================================
-            // Bottom collision
-            // ==============================================
-            if (ballY - ballHalfSize < -1.0f)
-            {
-                ballY = -1.0f + ballHalfSize;
+        // Right paddle
+        if (glfwGetKey(window, GLFW_KEY_UP)
+            == GLFW_PRESS)
+        {
+            rightPaddle.moveUp();
+        }
 
-                ballSpeedY *= -1.0f;
-            }
+        if (glfwGetKey(window, GLFW_KEY_DOWN)
+            == GLFW_PRESS)
+        {
+            rightPaddle.moveDown();
+        }
 
-            // ==============================================
-            // LEFT paddle collision
-            // ==============================================
-            bool collisionLeft =
+        leftPaddle.clamp();
+        rightPaddle.clamp();
+    }
 
-                ballX - ballHalfSize <
-                    leftPaddleX + paddleHalfWidth &&
+    // ======================================================
+    // Ball + Collision Logic
+    // ======================================================
+    void update()
+    {
+        if (gameOver)
+            return;
 
-                ballX + ballHalfSize >
-                    leftPaddleX - paddleHalfWidth &&
+        float paddleHalfWidth =
+            leftPaddle.width * 0.5f;
 
-                ballY - ballHalfSize <
-                    leftPaddleY + paddleHalfHeight &&
+        float paddleHalfHeight =
+            leftPaddle.height * 0.5f;
 
-                ballY + ballHalfSize >
-                    leftPaddleY - paddleHalfHeight;
+        float ballHalfSize =
+            ball.size * 0.5f;
 
-            if (collisionLeft && ballSpeedX < 0.0f)
-            {
-                ballSpeedX *= -1.0f;
+        ball.move();
 
-                ballX =
-                    leftPaddleX +
-                    paddleHalfWidth +
-                    ballHalfSize;
-            }
+        ball.checkWallCollision();
 
-            // ==============================================
-            // RIGHT paddle collision
-            // ==============================================
-            bool collisionRight =
+        // ==================================================
+        // LEFT paddle collision
+        // ==================================================
+        bool collisionLeft =
 
-                ballX + ballHalfSize >
-                    rightPaddleX - paddleHalfWidth &&
+            ball.x - ballHalfSize <
+            leftPaddle.x + paddleHalfWidth &&
 
-                ballX - ballHalfSize <
-                    rightPaddleX + paddleHalfWidth &&
+            ball.x + ballHalfSize >
+            leftPaddle.x - paddleHalfWidth &&
 
-                ballY - ballHalfSize <
-                    rightPaddleY + paddleHalfHeight &&
+            ball.y - ballHalfSize <
+            leftPaddle.y + paddleHalfHeight &&
 
-                ballY + ballHalfSize >
-                    rightPaddleY - paddleHalfHeight;
+            ball.y + ballHalfSize >
+            leftPaddle.y - paddleHalfHeight;
 
-            if (collisionRight && ballSpeedX > 0.0f)
-            {
-                ballSpeedX *= -1.0f;
+        if (collisionLeft && ball.speedX < 0.0f)
+        {
+            ball.speedX *= -1.0f;
 
-                ballX =
-                    rightPaddleX -
-                    paddleHalfWidth -
-                    ballHalfSize;
-            }
-
-            // ==============================================
-            // LEFT scores
-            // ==============================================
-            if (ballX > 1.1f)
-            {
-                leftScore++;
-
-                resetBall();
-            }
-
-            // ==============================================
-            // RIGHT scores
-            // ==============================================
-            if (ballX < -1.1f)
-            {
-                rightScore++;
-
-                resetBall();
-            }
-
-            // ==============================================
-            // Win check
-            // ==============================================
-            if (leftScore >= 10)
-            {
-                gameOver = true;
-
-                winnerText = "LEFT PLAYER";
-            }
-
-            if (rightScore >= 10)
-            {
-                gameOver = true;
-
-                winnerText = "RIGHT PLAYER";
-            }
+            ball.x =
+                leftPaddle.x +
+                paddleHalfWidth +
+                ballHalfSize;
         }
 
         // ==================================================
-        // Clear screen
+        // RIGHT paddle collision
         // ==================================================
+        bool collisionRight =
+
+            ball.x + ballHalfSize >
+            rightPaddle.x - paddleHalfWidth &&
+
+            ball.x - ballHalfSize <
+            rightPaddle.x + paddleHalfWidth &&
+
+            ball.y - ballHalfSize <
+            rightPaddle.y + paddleHalfHeight &&
+
+            ball.y + ballHalfSize >
+            rightPaddle.y - paddleHalfHeight;
+
+        if (collisionRight && ball.speedX > 0.0f)
+        {
+            ball.speedX *= -1.0f;
+
+            ball.x =
+                rightPaddle.x -
+                paddleHalfWidth -
+                ballHalfSize;
+        }
+
+        // ==================================================
+        // LEFT scores
+        // ==================================================
+        if (ball.x > 1.1f)
+        {
+            leftScore++;
+
+            ball.reset();
+        }
+
+        // ==================================================
+        // RIGHT scores
+        // ==================================================
+        if (ball.x < -1.1f)
+        {
+            rightScore++;
+
+            ball.reset();
+        }
+
+        // ==================================================
+        // Win check
+        // ==================================================
+        if (leftScore >= 10)
+        {
+            gameOver = true;
+
+            winnerText = "LEFT PLAYER";
+        }
+
+        if (rightScore >= 10)
+        {
+            gameOver = true;
+
+            winnerText = "RIGHT PLAYER";
+        }
+    }
+
+    // ======================================================
+    // Draw Object
+    // ======================================================
+    void drawObject(float x,
+        float y,
+        float width,
+        float height,
+        float r,
+        float g,
+        float b)
+    {
+        glUniform2f(offsetLoc, x, y);
+
+        glUniform2f(scaleLoc, width, height);
+
+        glUniform3f(colorLoc, r, g, b);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+
+    // ======================================================
+    // Render
+    // ======================================================
+    void render()
+    {
         glClearColor(
             0.0f,
             0.0f,
@@ -509,96 +604,93 @@ int main()
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // ==================================================
-        // Use shader
-        // ==================================================
         glUseProgram(shaderProgram);
 
         glBindVertexArray(VAO);
 
-        // ==================================================
-        // Draw LEFT paddle
-        // ==================================================
-        glUniform2f(
-            offsetLoc,
-            leftPaddleX,
-            leftPaddleY
-        );
-
-        glUniform2f(
-            scaleLoc,
-            paddleWidth,
-            paddleHeight
-        );
-
-        glUniform3f(
-            colorLoc,
+        // Left paddle
+        drawObject(
+            leftPaddle.x,
+            leftPaddle.y,
+            leftPaddle.width,
+            leftPaddle.height,
             1.0f,
             1.0f,
             1.0f
         );
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        // ==================================================
-        // Draw RIGHT paddle
-        // ==================================================
-        glUniform2f(
-            offsetLoc,
-            rightPaddleX,
-            rightPaddleY
+        // Right paddle
+        drawObject(
+            rightPaddle.x,
+            rightPaddle.y,
+            rightPaddle.width,
+            rightPaddle.height,
+            1.0f,
+            1.0f,
+            1.0f
         );
 
-        glUniform2f(
-            scaleLoc,
-            paddleWidth,
-            paddleHeight
-        );
-
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        // ==================================================
-        // Draw BALL
-        // ==================================================
-        glUniform2f(
-            offsetLoc,
-            ballX,
-            ballY
-        );
-
-        glUniform2f(
-            scaleLoc,
-            ballSize,
-            ballSize
-        );
-
-        glUniform3f(
-            colorLoc,
+        // Ball
+        drawObject(
+            ball.x,
+            ball.y,
+            ball.size,
+            ball.size,
             1.0f,
             0.2f,
             0.2f
         );
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        // ==================================================
-        // Swap buffers
-        // ==================================================
         glfwSwapBuffers(window);
 
         glfwPollEvents();
     }
 
     // ======================================================
+    // Game Loop
+    // ======================================================
+    void run()
+    {
+        while (!glfwWindowShouldClose(window))
+        {
+            processInput();
+
+            updateWindowTitle();
+
+            update();
+
+            render();
+        }
+    }
+
+    // ======================================================
     // Cleanup
     // ======================================================
-    glDeleteVertexArrays(1, &VAO);
+    void cleanup()
+    {
+        glDeleteVertexArrays(1, &VAO);
 
-    glDeleteBuffers(1, &VBO);
+        glDeleteBuffers(1, &VBO);
 
-    glDeleteProgram(shaderProgram);
+        glDeleteProgram(shaderProgram);
 
-    glfwTerminate();
+        glfwTerminate();
+    }
+};
+
+// ==========================================================
+// Main
+// ==========================================================
+int main()
+{
+    Game game;
+
+    if (!game.initialize())
+        return -1;
+
+    game.run();
+
+    game.cleanup();
 
     return 0;
 }
