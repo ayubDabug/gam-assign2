@@ -1,3 +1,4 @@
+#define GLEW_STATIC
 #include <glew.h>
 #include <glfw3.h>
 
@@ -172,8 +173,22 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         
-        
+        /*
+           Clear both the color buffer
+           and depth buffer before
+           rendering the next frame.
+       */
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        /*
+            Set the background color.
+
+            RGBA:
+            R = 0.1
+            G = 0.1
+            B = 0.15
+            A = 1.0
+        */
 
         glClearColor(
             0.0f,
@@ -192,29 +207,6 @@ int main()
                 true);
         }
 
-        /*
-            Set the background color.
-
-            RGBA:
-            R = 0.1
-            G = 0.1
-            B = 0.15
-            A = 1.0
-        */
-        glClearColor(
-            0.1f,
-            0.1f,
-            0.15f,
-            1.0f);
-
-        /*
-            Clear both the color buffer
-            and depth buffer before
-            rendering the next frame.
-        */
-        glClear(
-            GL_COLOR_BUFFER_BIT |
-            GL_DEPTH_BUFFER_BIT);
 
         /*
             Calculate the rotation angle.
