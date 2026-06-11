@@ -6,9 +6,7 @@
 Map::Map()
 {
     rows = 22;
-
     columns = 40;
-
     tileSize = 32;
 
     std::srand(
@@ -20,9 +18,7 @@ int Map::Index(
     int row,
     int column) const
 {
-    return
-        row * columns +
-        column;
+    return row * columns + column;
 }
 
 //--------------------------------------------------
@@ -39,8 +35,11 @@ void Map::Generate()
     Clear();
 
     tiles.resize(
-        rows *
-        columns);
+        rows * columns);
+
+    //--------------------------------------------------
+    // Random Generation
+    //--------------------------------------------------
 
     for (int row = 0;
         row < rows;
@@ -69,14 +68,14 @@ void Map::Generate()
             int random =
                 std::rand() % 100;
 
-            if (random < 20)
+            if (random < 18)
             {
                 tile.type =
                     TileType::Breakable;
 
                 tile.health = 1;
             }
-            else if (random < 30)
+            else if (random < 25)
             {
                 tile.type =
                     TileType::Steel;
@@ -93,22 +92,22 @@ void Map::Generate()
     }
 
     //--------------------------------------------------
-    // Player Spawn Zone
+    // Player Area
     //--------------------------------------------------
 
     for (int row = 0;
         row < 5;
         row++)
     {
-        for (int column = 0;
-            column < 5;
-            column++)
+        for (int col = 0;
+            col < 5;
+            col++)
         {
             Tile& tile =
                 tiles[
                     Index(
                         row,
-                        column)];
+                        col)];
 
             tile.type =
                 TileType::Empty;
@@ -118,22 +117,97 @@ void Map::Generate()
     }
 
     //--------------------------------------------------
-    // Enemy Spawn Zone
+    // Top Left Enemy
     //--------------------------------------------------
 
-    for (int row = rows - 5;
-        row < rows;
+    for (int row = 17;
+        row < 22;
         row++)
     {
-        for (int column = columns - 5;
-            column < columns;
-            column++)
+        for (int col = 0;
+            col < 5;
+            col++)
         {
             Tile& tile =
                 tiles[
                     Index(
                         row,
-                        column)];
+                        col)];
+
+            tile.type =
+                TileType::Empty;
+
+            tile.health = 0;
+        }
+    }
+
+    //--------------------------------------------------
+    // Top Right Enemy
+    //--------------------------------------------------
+
+    for (int row = 17;
+        row < 22;
+        row++)
+    {
+        for (int col = 35;
+            col < 40;
+            col++)
+        {
+            Tile& tile =
+                tiles[
+                    Index(
+                        row,
+                        col)];
+
+            tile.type =
+                TileType::Empty;
+
+            tile.health = 0;
+        }
+    }
+
+    //--------------------------------------------------
+    // Center Enemy
+    //--------------------------------------------------
+
+    for (int row = 9;
+        row < 13;
+        row++)
+    {
+        for (int col = 18;
+            col < 22;
+            col++)
+        {
+            Tile& tile =
+                tiles[
+                    Index(
+                        row,
+                        col)];
+
+            tile.type =
+                TileType::Empty;
+
+            tile.health = 0;
+        }
+    }
+
+    //--------------------------------------------------
+    // Bottom Right Enemy
+    //--------------------------------------------------
+
+    for (int row = 0;
+        row < 5;
+        row++)
+    {
+        for (int col = 35;
+            col < 40;
+            col++)
+        {
+            Tile& tile =
+                tiles[
+                    Index(
+                        row,
+                        col)];
 
             tile.type =
                 TileType::Empty;
@@ -281,7 +355,7 @@ bool Map::DamageTile(
 }
 
 //--------------------------------------------------
-// Spawn
+// Spawn Points
 //--------------------------------------------------
 
 glm::vec2 Map::GetPlayerSpawn() const
@@ -299,16 +373,32 @@ glm::vec2 Map::GetEnemySpawn(
     switch (index)
     {
     case 0:
-        return { 1180.0f,650.0f };
+        return
+        {
+            64.0f,
+            640.0f
+        };
 
     case 1:
-        return { 1100.0f,650.0f };
+        return
+        {
+            1184.0f,
+            640.0f
+        };
 
     case 2:
-        return { 1180.0f,580.0f };
+        return
+        {
+            640.0f,
+            352.0f
+        };
 
     default:
-        return { 1120.0f,620.0f };
+        return
+        {
+            1184.0f,
+            64.0f
+        };
     }
 }
 
@@ -379,7 +469,6 @@ bool Tile::IsSolid() const
     return
         type ==
         TileType::Breakable ||
-
         type ==
         TileType::Steel;
 }

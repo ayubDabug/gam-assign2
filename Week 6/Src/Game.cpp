@@ -315,6 +315,10 @@ void Game::UpdateEnemies(
         enemy.Update(
             deltaTime);
 
+        //--------------------------------------------------
+        // Collision With Walls
+        //--------------------------------------------------
+
         if (
             map.CheckTankCollision(
                 enemy.GetPosition(),
@@ -323,27 +327,65 @@ void Game::UpdateEnemies(
         {
             enemy.SetPosition(
                 oldPosition);
+
+            enemy.ChooseNewPatrolDirection();
         }
+
+        //--------------------------------------------------
+        // Screen Limits
+        //--------------------------------------------------
 
         glm::vec2 position =
             enemy.GetPosition();
 
-        position.x =
-            std::clamp(
-                position.x,
-                16.0f,
-                static_cast<float>(
-                    screenWidth - 16));
+        bool hitBorder =
+            false;
 
-        position.y =
-            std::clamp(
-                position.y,
-                16.0f,
+        if (position.x < 16.0f)
+        {
+            position.x = 16.0f;
+            hitBorder = true;
+        }
+
+        if (position.x >
+            static_cast<float>(
+                screenWidth - 16))
+        {
+            position.x =
                 static_cast<float>(
-                    screenHeight - 16));
+                    screenWidth - 16);
+
+            hitBorder = true;
+        }
+
+        if (position.y < 16.0f)
+        {
+            position.y = 16.0f;
+            hitBorder = true;
+        }
+
+        if (position.y >
+            static_cast<float>(
+                screenHeight - 16))
+        {
+            position.y =
+                static_cast<float>(
+                    screenHeight - 16);
+
+            hitBorder = true;
+        }
 
         enemy.SetPosition(
             position);
+
+        if (hitBorder)
+        {
+            enemy.ChooseNewPatrolDirection();
+        }
+
+        //--------------------------------------------------
+        // Shooting
+        //--------------------------------------------------
 
         if (
             enemy.CanSeeTarget() &&

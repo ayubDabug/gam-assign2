@@ -1,6 +1,7 @@
 #include "Enemy.h"
 
 #include <cmath>
+#include <cstdlib>
 
 #include <glm.hpp>
 
@@ -14,22 +15,39 @@ Enemy::Enemy()
     };
 
     detectionRange =
-        500.0f;
+        350.0f;
 
     shootingRange =
-        300.0f;
+        250.0f;
 
     fireCooldown =
-        1.5f;
+        1.2f;
 
     fireTimer =
         0.0f;
 
+    state =
+        EnemyState::Patrol;
+
+    patrolDirection =
+    {
+        1.0f,
+        0.0f
+    };
+
+    patrolTimer =
+        0.0f;
+
+    patrolDuration =
+        2.0f;
+
     moveSpeed =
-        120.0f;
+        100.0f;
 
     rotationSpeed =
         2.5f;
+
+    ChooseNewPatrolDirection();
 }
 
 //--------------------------------------------------
@@ -105,7 +123,7 @@ void Enemy::ResetFireTimer()
 }
 
 //--------------------------------------------------
-// AI Helpers
+// Helpers
 //--------------------------------------------------
 
 float Enemy::DistanceToTarget() const
@@ -147,6 +165,62 @@ bool Enemy::CanSeeTarget() const
         detectionRange;
 }
 
+EnemyState Enemy::GetState() const
+{
+    return state;
+}
+
+//--------------------------------------------------
+// Patrol
+//--------------------------------------------------
+
+void Enemy::ChooseNewPatrolDirection()
+{
+    int random =
+        std::rand() % 4;
+
+    switch (random)
+    {
+    case 0:
+        patrolDirection =
+        {
+            1.0f,
+            0.0f
+        };
+        break;
+
+    case 1:
+        patrolDirection =
+        {
+            -1.0f,
+            0.0f
+        };
+        break;
+
+    case 2:
+        patrolDirection =
+        {
+            0.0f,
+            1.0f
+        };
+        break;
+
+    default:
+        patrolDirection =
+        {
+            0.0f,
+            -1.0f
+        };
+        break;
+    }
+
+    patrolDuration =
+        1.5f +
+        static_cast<float>(
+            std::rand() % 300)
+        / 100.0f;
+}
+
 //--------------------------------------------------
 // Update
 //--------------------------------------------------
@@ -154,41 +228,115 @@ bool Enemy::CanSeeTarget() const
 void Enemy::Update(
     float deltaTime)
 {
-    fireTimer +=
-        deltaTime;
-
     if (!alive)
     {
         return;
     }
 
-    if (!CanSeeTarget())
+    fireTimer +=
+        deltaTime;
+
+    //--------------------------------------------------
+    // State Change
+    //--------------------------------------------------
+
+    if (CanSeeTarget())
     {
+        state =
+            EnemyState::Chase;
+    }
+    else
+    {
+        state =
+            EnemyState::Patrol;
+    }
+
+    //--------------------------------------------------
+    // Chase
+    //--------------------------------------------------
+
+    if (
+        state ==
+        EnemyState::Chase)
+    {
+        glm::vec2 direction =
+            DirectionToTarget();
+
+        if (
+            glm::dot(
+                direction,
+                direction)
+        >
+            0.0001f)
+        {
+            rotation =
+                std::atan2(
+                    direction.y,
+                    direction.x);
+
+            position +=
+                direction *
+                moveSpeed *
+                deltaTime;
+        }
+
         return;
     }
 
-    glm::vec2 direction =
-        DirectionToTarget();
+    //--------------------------------------------------
+    // Patrol
+    //--------------------------------------------------
+
+    patrolTimer +=
+        deltaTime;
 
     if (
-        glm::dot(
-            direction,
-            direction)
-        <
-        0.0001f)
+        patrolTimer >=
+        patrolDuration)
     {
-        return;
+        patrolTimer =
+            0.0f;
+
+        ChooseNewPatrolDirection();
     }
 
     rotation =
         std::atan2(
-            direction.y,
-            direction.x);
+            patrolDirection.y,
+            patrolDirection.x);
 
     position +=
-        direction *
+        patrolDirection *
         moveSpeed *
         deltaTime;
+
+    //--------------------------------------------------
+    // Map Limits
+    //--------------------------------------------------
+
+    if (position.x < 32.0f)
+    {
+        position.x = 32.0f;
+        ChooseNewPatrolDirection();
+    }
+
+    if (position.x > 1248.0f)
+    {
+        position.x = 1248.0f;
+        ChooseNewPatrolDirection();
+    }
+
+    if (position.y < 32.0f)
+    {
+        position.y = 32.0f;
+        ChooseNewPatrolDirection();
+    }
+
+    if (position.y > 688.0f)
+    {
+        position.y = 688.0f;
+        ChooseNewPatrolDirection();
+    }
 }
 
 //--------------------------------------------------

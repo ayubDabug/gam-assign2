@@ -5,57 +5,44 @@
 
 #include <glm.hpp>
 
+enum class EnemyState
+{
+    Patrol,
+    Chase
+};
+
 class Enemy : public Tank
 {
 private:
 
-    //--------------------------------------------------
-    // AI
-    //--------------------------------------------------
-
     glm::vec2 targetPosition;
 
     float detectionRange;
-
     float shootingRange;
 
-    //--------------------------------------------------
-    // Shooting
-    //--------------------------------------------------
-
     float fireCooldown;
-
     float fireTimer;
+
+    EnemyState state;
+
+    glm::vec2 patrolDirection;
+
+    float patrolTimer;
+    float patrolDuration;
 
 public:
 
-    //--------------------------------------------------
-    // Constructor
-    //--------------------------------------------------
-
     Enemy();
-
-    //--------------------------------------------------
-    // Target
-    //--------------------------------------------------
 
     void SetTargetPosition(
         const glm::vec2& position);
 
     glm::vec2 GetTargetPosition() const;
 
-    //--------------------------------------------------
-    // Detection
-    //--------------------------------------------------
-
     void SetDetectionRange(
         float range);
 
     float GetDetectionRange() const;
-
-    //--------------------------------------------------
-    // Shooting
-    //--------------------------------------------------
 
     void SetShootingRange(
         float range);
@@ -71,26 +58,18 @@ public:
 
     void ResetFireTimer();
 
-    //--------------------------------------------------
-    // AI Helpers
-    //--------------------------------------------------
-
     float DistanceToTarget() const;
 
     glm::vec2 DirectionToTarget() const;
 
     bool CanSeeTarget() const;
 
-    //--------------------------------------------------
-    // Update
-    //--------------------------------------------------
+    EnemyState GetState() const;
+
+    void ChooseNewPatrolDirection();
 
     virtual void Update(
         float deltaTime) override;
-
-    //--------------------------------------------------
-    // Destructor
-    //--------------------------------------------------
 
     virtual ~Enemy();
 };
