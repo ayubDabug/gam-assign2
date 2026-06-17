@@ -3,4 +3,4 @@ all code is in week 6, and up to level 3 is implemented, you have to manually st
 
 
 
-if doesnt work, clone the opengl week 6 base version, and change the renderer file to this renderer file, add level two and three file from here, and also change the game and renderer header files to the one in this repo.
+if doesnt work, clone the week 6 in opengl github, add files and change existing files in that github, changing the renderer.cpp, renderer.h, and game.h to the ones on this repo. and adding the levels two and three found on this repo
