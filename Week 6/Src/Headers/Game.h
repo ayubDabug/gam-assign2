@@ -139,7 +139,8 @@ private:
             • Configure dimensions
     */
     void SpawnEnemies();
-
+    void SpawnEnemiesLevel2();
+    void SpawnEnemiesLevel3();
     /*
         Processes player keyboard input.
 
@@ -313,6 +314,9 @@ public:
     Map& GetMap();
 
     Renderer& GetRenderer();
+
+    void LoadLevel2();
+    void LoadLevel3();
 };
 
 #endif

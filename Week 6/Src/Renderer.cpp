@@ -158,6 +158,36 @@ Renderer::Renderer()
 
     brickMesh = nullptr;
     steelMesh = nullptr;
+
+    //--------------------------------------------------
+    // Level 2 obstacle meshes (new color scheme).
+    //--------------------------------------------------
+
+    brickMeshLevel2 = nullptr;
+    steelMeshLevel2 = nullptr;
+
+    //--------------------------------------------------
+    // Level 3 obstacle meshes (new color scheme).
+    //
+    // These reuse the exact same geometry as the
+    // Level 1 blocks; only the colors differ.
+    //--------------------------------------------------
+
+    brickMeshLevel3 = nullptr;
+    steelMeshLevel3 = nullptr;
+
+    //--------------------------------------------------
+    // Active level.
+    //
+    // Determines which obstacle color scheme is
+    // used when drawing map tiles.
+    //
+    //      1 -> Level 1 colors
+    //      2 -> Level 2 colors
+    //      3 -> Level 3 colors
+    //--------------------------------------------------
+
+    currentLevel = 1;
 }
 
 /*
@@ -258,7 +288,7 @@ bool Renderer::Initialize()
                 0.0f));
 
     //--------------------------------------------------
-    // Breakable Block Mesh
+    // Breakable Block Mesh (Level 1)
     //--------------------------------------------------
 
     brickMesh =
@@ -272,7 +302,7 @@ bool Renderer::Initialize()
                 0.07f));
 
     //--------------------------------------------------
-    // Steel Block Mesh
+    // Steel Block Mesh (Level 1)
     //--------------------------------------------------
 
     steelMesh =
@@ -285,7 +315,88 @@ bool Renderer::Initialize()
                 0.65f,
                 0.65f));
 
+    //--------------------------------------------------
+    // Breakable Block Mesh (Level 2)
+    //
+    // Cool teal tone for the "Increased Threat"
+    // battlefield.
+    //--------------------------------------------------
+
+    brickMeshLevel2 =
+        new Mesh(
+            CreateRectangle(
+                32.0f,
+                32.0f,
+
+                0.10f,
+                0.45f,
+                0.55f));
+
+    //--------------------------------------------------
+    // Steel Block Mesh (Level 2)
+    //--------------------------------------------------
+
+    steelMeshLevel2 =
+        new Mesh(
+            CreateRectangle(
+                32.0f,
+                32.0f,
+
+                0.25f,
+                0.30f,
+                0.40f));
+
+    //--------------------------------------------------
+    // Breakable Block Mesh (Level 3)
+    //
+    // Crimson tone for the "Heavy Resistance"
+    // battlefield.
+    //--------------------------------------------------
+
+    brickMeshLevel3 =
+        new Mesh(
+            CreateRectangle(
+                32.0f,
+                32.0f,
+
+                0.65f,
+                0.12f,
+                0.15f));
+
+    //--------------------------------------------------
+    // Steel Block Mesh (Level 3)
+    //
+    // Dark maroon steel to match the Level 3
+    // color scheme.
+    //--------------------------------------------------
+
+    steelMeshLevel3 =
+        new Mesh(
+            CreateRectangle(
+                32.0f,
+                32.0f,
+
+                0.35f,
+                0.12f,
+                0.12f));
+
     return true;
+}
+
+/*
+    Selects the active level.
+
+    Used to switch the obstacle color scheme.
+
+        Level 1 -> original brown / gray blocks
+        Level 2 -> teal / slate blocks
+        Level 3 -> crimson / maroon blocks
+*/
+void Renderer::SetLevel(
+    int level)
+{
+    currentLevel =
+        level;
 }
 
 /*
@@ -509,6 +620,9 @@ void Renderer::DrawBullet(
 
         • Breakable
         • Steel
+
+    The mesh chosen depends on the active level,
+    which controls the obstacle color scheme.
 */
 void Renderer::DrawTile(
     const Tile& tile)
@@ -516,18 +630,43 @@ void Renderer::DrawTile(
     Mesh* mesh =
         nullptr;
 
+    //--------------------------------------------------
+    // Select the obstacle mesh based on the
+    // current level color scheme.
+    //--------------------------------------------------
+
     if (tile.type ==
         TileType::Breakable)
     {
-        mesh =
-            brickMesh;
+        if (currentLevel == 2)
+        {
+            mesh = brickMeshLevel2;
+        }
+        else if (currentLevel >= 3)
+        {
+            mesh = brickMeshLevel3;
+        }
+        else
+        {
+            mesh = brickMesh;
+        }
     }
     else if (
         tile.type ==
         TileType::Steel)
     {
-        mesh =
-            steelMesh;
+        if (currentLevel == 2)
+        {
+            mesh = steelMeshLevel2;
+        }
+        else if (currentLevel >= 3)
+        {
+            mesh = steelMeshLevel3;
+        }
+        else
+        {
+            mesh = steelMesh;
+        }
     }
 
     if (!mesh)
@@ -649,6 +788,26 @@ void Renderer::Shutdown()
 
     delete steelMesh;
     steelMesh = nullptr;
+
+    //--------------------------------------------------
+    // Release Level 2 obstacle meshes.
+    //--------------------------------------------------
+
+    delete brickMeshLevel2;
+    brickMeshLevel2 = nullptr;
+
+    delete steelMeshLevel2;
+    steelMeshLevel2 = nullptr;
+
+    //--------------------------------------------------
+    // Release Level 3 obstacle meshes.
+    //--------------------------------------------------
+
+    delete brickMeshLevel3;
+    brickMeshLevel3 = nullptr;
+
+    delete steelMeshLevel3;
+    steelMeshLevel3 = nullptr;
 }
 
 /*

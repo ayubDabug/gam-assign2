@@ -93,16 +93,17 @@ bool Game::Initialize(
     // Generate a procedural map.
     //--------------------------------------------------
 
-    map.Generate();
+    // load level 1
+    //map.Generate();
+    //SpawnPlayer();
+    //SpawnEnemies();
+    
+    
+    // load level 2
+    //LoadLevel2();
 
-    //--------------------------------------------------
-    // Spawn gameplay entities.
-    //--------------------------------------------------
-
-    SpawnPlayer();
-
-    SpawnEnemies();
-
+    // load level 3
+    LoadLevel3();
     return true;
 }
 

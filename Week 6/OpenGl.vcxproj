@@ -146,6 +146,8 @@
     <ClCompile Include="Src\Bullet.cpp" />
     <ClCompile Include="Src\Enemy.cpp" />
     <ClCompile Include="Src\Game.cpp" />
+    <ClCompile Include="Src\GameLevel2.cpp" />
+    <ClCompile Include="Src\GameLevel3.cpp" />
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\Map.cpp" />
     <ClCompile Include="Src\Mesh.cpp" />

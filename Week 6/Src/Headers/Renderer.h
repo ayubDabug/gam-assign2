@@ -168,6 +168,12 @@ private:
 
     Mesh* steelMesh;
 
+    Mesh* brickMeshLevel2;
+    Mesh* steelMeshLevel2;
+    Mesh* brickMeshLevel3;
+    Mesh* steelMeshLevel3;
+    int   currentLevel;
+
 private:
 
     //--------------------------------------------------
@@ -344,6 +350,7 @@ public:
     //--------------------------------------------------
 
     ~Renderer();
+    void SetLevel(int level);
 };
 
 #endif
